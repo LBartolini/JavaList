@@ -1,58 +1,112 @@
 
-public class List {
-	Item firstItem;
-	int position = 0;
-	public void push(Item item) {
-		if (position == 0) {
-			firstItem = item;
-		}else {
-			Item temp = firstItem;
-			for(int i = 1; i < position; i++) {
-				temp = temp.next;
+public class List<T> {
+	private Item<T> head, tail;
+	private int lenght;
+	
+	public List() {
+		this.lenght = 0;
+		this.head = null;
+		this.tail = null;
+	}
+	
+	public int lenght() {
+		return this.lenght;
+	}
+	
+	public void push(T value) {
+		this.insertValueAt(this.lenght, value);
+	}
+	
+	public T pop(int pos) {
+		if(pos <= this.lenght-1) {
+			Item<T> old = this.getItemAt(pos);
+			
+			if(pos == 0) {
+				old.getNext().setPrec(null);
+				this.head = old.getNext();
+			}else if(pos == (this.lenght-1)) {
+				old.getPrec().setNext(null);
+				this.tail = old.getPrec();
+			}else{
+				old.getPrec().setNext(old.getNext());
+				old.getNext().setPrec(old.getPrec());
 			}
-			temp.next = item;
+			
+			this.lenght--;
+			
+			return old.getValue();
+		}else {
+			return null;
 		}
-		position++;
 	}
 	
-	public void delete(int pos) {
-		Item temp = firstItem;
-		Item prec = null;
+	public void insertValueAt(int pos, T value) {
+		Item<T> new_item = new Item<T>(value);
+		if(pos == 0) { 
+			// insert in head
+			new_item.setNext(this.head);
+			new_item.setPrec(null);
+			if(this.lenght > 0) {  // list is not empty
+				this.head.setPrec(new_item); 
+			}else { // list is empty
+				this.tail = new_item;
+			}
+			this.head = new_item;
+		}else if(pos == this.lenght) {
+			// insert in tail
+			new_item.setPrec(this.tail);
+			new_item.setNext(null);
+			this.tail.setNext(new_item);
+			this.tail = new_item;
+		}else {
+			Item<T> old_item = this.getItemAt(pos);
+			old_item.getPrec().setNext(new_item);
+			new_item.setPrec(old_item.getPrec());
+			new_item.setNext(old_item);
+			old_item.setPrec(new_item);
+		}
 		
-		for(int i = 0; i < pos; i++) {
-			prec = temp;
-			temp = temp.next;
-		}
-		if (pos == 0) {
-			firstItem = firstItem.next;	
-		}else if (pos != position-1) {
-			prec.next = temp.next;
+		this.lenght++;
+	}
+	
+	public T getValueAt(int pos) {
+		T retValue = this.getItemAt(pos).getValue();
+		
+		return retValue;
+	}
+	
+	public Item<T> getItemAt(int pos) {
+		Item<T> retValue = null;
+		if((this.lenght - pos) > (int)(this.lenght / 2)) {
+			// first half - from head
+			Item<T> temp = this.head;
+			for(int i = 0; i < pos; i++) {
+				temp = temp.getNext();
+			}
+			retValue = temp;
+		}else {
+			// second half - from tail
+			Item<T> temp = this.tail;
+			for(int i = 0; i < (this.lenght - pos - 1); i++) { // (this.lenght - pos) è la distanza dal TAIL alla posizione cercata
+				temp = temp.getPrec();
+			}
+			retValue = temp;
 		}
 		
-		position--;
+		return retValue;
 	}
 	
-	public int get(int pos) {
-		Item temp = firstItem;
-		for(int i = 0; i < pos; i++) {
-			temp = temp.next;
-		}
-		return temp.value;
-	}
-	
-	public void set(int pos, int value) {
-		Item temp = firstItem;
-		for(int i = 0; i < pos; i++) {
-			temp = temp.next;
-		}
-		temp.value = value;
+	public void setValueAt(int pos, T value) {
+		Item<T> item = this.getItemAt(pos);
+		item.setValue(value);
 	}
 	
 	public void printAll() {
-		Item temp = firstItem;
-		for(int i = 0; i < position; i++) {
-			System.out.println("Pos: " + i + " Value: " + temp.value);
-			temp = temp.next;
+		Item<T> temp;
+		for(int i = 0; i < this.lenght; i++) {
+			temp = this.getItemAt(i);
+			System.out.println("Pos: " + i + " Value: " + temp.getValue());
+			
 		}
 	}
 }
